@@ -1,4 +1,4 @@
-package frc.team2423;
+package frc.team2423.util;
 
 import java.util.function.Consumer;
 import edu.wpi.first.networktables.NetworkTableInstance;
