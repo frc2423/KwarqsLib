@@ -1,4 +1,4 @@
-package frc.team2423;
+package frc.team2423.util;
 
 import edu.wpi.first.wpiutil.math.MathUtil;
 
