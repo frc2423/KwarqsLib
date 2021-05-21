@@ -17,7 +17,7 @@ public class SimMotor extends Device implements IMotor {
     private double desiredSpeed = 0;
     private double desiredPercent = 0;
 
-    public SimMotor(int port, int channelA, int channelB, String name) {
+    public SimMotor(int port, int channelA, int channelB) {
         motor = new PWMVictorSPX(port);
         setPercent(0);
     }
@@ -25,6 +25,11 @@ public class SimMotor extends Device implements IMotor {
     public void setSpeed(double speed) {
         desiredSpeed = speed;
         controlType = "speed";
+        motor.setVoltage(desiredSpeed);
+        for (SimMotor follower : followers) {
+            follower.setSpeed(desiredSpeed);
+        }
+
     }
 
     public double getSpeed(){
@@ -34,6 +39,10 @@ public class SimMotor extends Device implements IMotor {
     public void setPercent(double percent) {
         desiredPercent = percent;
         controlType = "percent";
+        motor.setVoltage(desiredPercent);
+        for (SimMotor follower : followers) {
+            follower.setPercent(desiredPercent);
+        }
     }
 
     public double getPercent(){
@@ -105,21 +114,5 @@ public class SimMotor extends Device implements IMotor {
 
     public void setEncoderPositionAndRate(double position, double rate){}
 
-    public void execute() {
-        if (controlType == "distance") {
 
-        } else if (controlType == "speed") {
-            motor.setVoltage(desiredSpeed);
-                            
-            for (SimMotor follower : followers) {
-                follower.setSpeed(desiredSpeed);
-            }
-        } else if (controlType == "percent") {
-            motor.setVoltage(desiredPercent);
-
-            for (SimMotor follower : followers) {
-                follower.setPercent(desiredPercent);
-            }
-        }
-    }
 }

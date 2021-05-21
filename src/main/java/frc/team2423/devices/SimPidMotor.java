@@ -22,7 +22,7 @@ public class SimPidMotor extends Device implements IMotor {
     private double desiredSpeed = 0;
     private double desiredPercent = 0;
 
-    public SimPidMotor(int port, int channelA, int channelB, String name) {
+    public SimPidMotor(int port, int channelA, int channelB) {
         motor = new PWMVictorSPX(port);
         encoder = new Encoder(channelA, channelB);
         encoderSim = new EncoderSim(encoder);
@@ -33,6 +33,12 @@ public class SimPidMotor extends Device implements IMotor {
     public void setSpeed(double speed) {
         desiredSpeed = speed;
         controlType = "speed";
+        double output = pidController.calculate(getSpeed(), desiredSpeed);
+        motor.setVoltage(output + feedForward.calculate(desiredSpeed));
+                        
+        for (SimPidMotor follower : followers) {
+            follower.setSpeed(desiredSpeed);
+        }
     }
 
     public double getSpeed(){
@@ -43,6 +49,11 @@ public class SimPidMotor extends Device implements IMotor {
     public void setPercent(double percent) {
         desiredPercent = percent;
         controlType = "percent";
+        motor.setVoltage(desiredPercent);
+
+        for (SimPidMotor follower : followers) {
+            follower.setPercent(desiredPercent);
+        }
     }
 
     public double getPercent(){
@@ -57,6 +68,8 @@ public class SimPidMotor extends Device implements IMotor {
     public void setDistance(double dist) {
         desiredDistance = dist;
         controlType = "distance";
+        double output = pidController.calculate(getDistance(), desiredDistance);
+        pidController.setSetpoint(output);
     }
 
     public void resetEncoder(double distance) {
@@ -142,23 +155,4 @@ public class SimPidMotor extends Device implements IMotor {
         encoderSim.setRate(rate);
     }
 
-    public void execute() {
-        if (controlType == "distance") {
-            double output = pidController.calculate(getDistance(), desiredDistance);
-            pidController.setSetpoint(output);
-        } else if (controlType == "speed") {
-            double output = pidController.calculate(getSpeed(), desiredSpeed);
-            motor.setVoltage(output + feedForward.calculate(desiredSpeed));
-                            
-            for (SimPidMotor follower : followers) {
-                follower.setSpeed(desiredSpeed);
-            }
-        } else if (controlType == "percent") {
-            motor.setVoltage(desiredPercent);
-
-            for (SimPidMotor follower : followers) {
-                follower.setPercent(desiredPercent);
-            }
-        }
-    }
 }

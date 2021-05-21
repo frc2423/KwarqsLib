@@ -23,7 +23,7 @@ public class NeoMotor extends Device implements IMotor {
     private double kD = 0;
     private double kF = 0;
 
-    public NeoMotor(int port, String name) {
+    public NeoMotor(int port) {
        motor = new CANSparkMax(port, MotorType.kBrushless);
        motor.restoreFactoryDefaults();
        encoder = motor.getEncoder();
@@ -31,10 +31,10 @@ public class NeoMotor extends Device implements IMotor {
        setPercent(0);
     }
 
-
     public void setSpeed(double speed){
         motorValue = speed / encoder.getVelocityConversionFactor();
         motorControlType = ControlType.kVelocity;
+        pidController.setReference(motorValue, motorControlType);
     }
 
     public double getSpeed(){
@@ -47,6 +47,7 @@ public class NeoMotor extends Device implements IMotor {
         motorValue = percent;
         motorControlType = ControlType.kDutyCycle;
         voltage = percent;
+        pidController.setReference(motorValue, motorControlType);
     }
 
     public double getPercent(){
@@ -56,6 +57,7 @@ public class NeoMotor extends Device implements IMotor {
     public void setDistance(double dist){
         motorValue = dist;
         motorControlType = ControlType.kPosition;
+        pidController.setReference(motorValue, motorControlType);
     }
 
     public void resetEncoder(double distance) {
@@ -145,7 +147,4 @@ public class NeoMotor extends Device implements IMotor {
         return getDistance() / getConversionFactor();
     }
 
-    public void execute() {
-        pidController.setReference(motorValue, motorControlType);
-    }
 }
